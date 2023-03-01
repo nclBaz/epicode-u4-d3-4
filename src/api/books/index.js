@@ -16,6 +16,7 @@ import { fileURLToPath } from "url"
 import { dirname, join } from "path"
 import uniqid from "uniqid"
 import createHttpError from "http-errors"
+import { checkBooksSchema, triggerBadRequest } from "./validation.js"
 
 const booksRouter = Express.Router()
 
@@ -28,7 +29,7 @@ const aStupidMiddleware = (req, res, next) => {
   next()
 }
 
-booksRouter.post("/", aStupidMiddleware, (req, res, next) => {
+booksRouter.post("/", aStupidMiddleware, checkBooksSchema, triggerBadRequest, (req, res, next) => {
   const newBook = { ...req.body, id: uniqid(), createdAt: new Date(), updatedAt: new Date() }
 
   const booksArray = getBooks()

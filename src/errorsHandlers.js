@@ -1,7 +1,7 @@
 export const badRequestHandler = (err, req, res, next) => {
   if (err.status === 400) {
     // This error handler is responsible for that error
-    res.status(400).send({ success: false, message: err.message })
+    res.status(400).send({ success: false, message: err.message, errorsList: err.errorsList.map(e => e.msg) })
   } else {
     // This error handler is NOT responsible for that error
     // We should pass the error to the next in chain

@@ -1,1 +1,10 @@
-[{ "title": "IT", "category": "horror", "id": "a3w05yslepl2vwy", "createdAt": "2023-03-01T11:17:39.729Z", "updatedAt": "2023-03-01T11:17:39.729Z" }]
+[
+  { "title": "IT", "category": "horror", "id": "a3w05yslepl2vwy", "createdAt": "2023-03-01T11:17:39.729Z", "updatedAt": "2023-03-01T11:17:39.729Z" },
+  {
+    "title": "IT",
+    "category": "horror",
+    "id": "a3w05kglepmnp5e",
+    "createdAt": "2023-03-01T12:01:50.353Z",
+    "updatedAt": "2023-03-01T12:01:50.353Z"
+  }
+]
