@@ -2,6 +2,7 @@
 import Express from "express" // NEW IMPORT SYNTAX (We can use it only if we add "type": "module", to package.json)
 import listEndpoints from "express-list-endpoints"
 import usersRouter from "./api/users/index.js"
+import booksRouter from "./api/books/index.js"
 
 const server = Express()
 const port = 3001
@@ -10,6 +11,7 @@ server.use(Express.json()) // If you don't add this line BEFORE the endpoints al
 
 // ************************** ENDPOINTS ***********************
 server.use("/users", usersRouter)
+server.use("/books", booksRouter)
 
 server.listen(port, () => {
   console.table(listEndpoints(server))
