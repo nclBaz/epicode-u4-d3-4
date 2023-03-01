@@ -15,6 +15,7 @@ import fs from "fs"
 import { fileURLToPath } from "url"
 import { dirname, join } from "path"
 import uniqid from "uniqid"
+import createHttpError from "http-errors"
 
 const booksRouter = Express.Router()
 
@@ -27,7 +28,7 @@ const aStupidMiddleware = (req, res, next) => {
   next()
 }
 
-booksRouter.post("/", aStupidMiddleware, (req, res) => {
+booksRouter.post("/", aStupidMiddleware, (req, res, next) => {
   const newBook = { ...req.body, id: uniqid(), createdAt: new Date(), updatedAt: new Date() }
 
   const booksArray = getBooks()
@@ -37,7 +38,8 @@ booksRouter.post("/", aStupidMiddleware, (req, res) => {
   res.status(201).send({ id: newBook.id })
 })
 
-booksRouter.get("/", aStupidMiddleware, (req, res) => {
+booksRouter.get("/", aStupidMiddleware, (req, res, next) => {
+  // throw new Error("KABOOOOOOOOOOOOOOOOOOM!")
   const books = getBooks()
   if (req.query && req.query.category) {
     const filteredBooks = books.filter(book => book.category === req.query.category)
@@ -47,37 +49,61 @@ booksRouter.get("/", aStupidMiddleware, (req, res) => {
   }
 })
 
-booksRouter.get("/:bookId", (req, res) => {
-  const booksArray = getBooks()
+booksRouter.get("/:bookId", (req, res, next) => {
+  try {
+    const booksArray = getBooks()
 
-  const foundBook = booksArray.find(book => book.id === req.params.bookId)
-  res.send(foundBook)
+    const foundBook = booksArray.find(book => book.id === req.params.bookId)
+    if (foundBook) {
+      res.send(foundBook)
+    } else {
+      // the book has not been found, I'd like to trigger a 404 error
+      next(createHttpError(404, `Book with id ${req.params.bookId} not found!`)) // this jumps to the error handlers
+    }
+  } catch (error) {
+    next(error) // This error does not have a status code, it should trigger a 500
+  }
 })
 
-booksRouter.put("/:bookId", (req, res) => {
-  const booksArray = getBooks()
+booksRouter.put("/:bookId", (req, res, next) => {
+  try {
+    const booksArray = getBooks()
 
-  const index = booksArray.findIndex(book => book.id === req.params.bookId)
+    const index = booksArray.findIndex(book => book.id === req.params.bookId)
+    if (index !== -1) {
+      const oldBook = booksArray[index]
 
-  const oldBook = booksArray[index]
+      const updatedBook = { ...oldBook, ...req.body, updatedAt: new Date() }
 
-  const updatedBook = { ...oldBook, ...req.body, updatedAt: new Date() }
+      booksArray[index] = updatedBook
 
-  booksArray[index] = updatedBook
+      writeBooks(booksArray)
 
-  writeBooks(booksArray)
-
-  res.send(updatedBook)
+      res.send(updatedBook)
+    } else {
+      next(createHttpError(404, `Book with id ${req.params.bookId} not found!`)) //
+    }
+  } catch (error) {
+    next(error)
+  }
 })
 
-booksRouter.delete("/:bookId", (req, res) => {
-  const booksArray = getBooks()
+booksRouter.delete("/:bookId", (req, res, next) => {
+  try {
+    const booksArray = getBooks()
 
-  const remainingBooks = booksArray.filter(book => book.id !== req.params.bookId)
+    const remainingBooks = booksArray.filter(book => book.id !== req.params.bookId)
 
-  writeBooks(remainingBooks)
+    if (booksArray.length !== remainingBooks.length) {
+      writeBooks(remainingBooks)
 
-  res.status(204).send()
+      res.status(204).send()
+    } else {
+      next(createHttpError(404, `Book with id ${req.params.bookId} not found!`)) //
+    }
+  } catch (error) {
+    next(error)
+  }
 })
 
 export default booksRouter

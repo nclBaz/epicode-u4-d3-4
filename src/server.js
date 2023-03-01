@@ -3,6 +3,7 @@ import Express from "express" // NEW IMPORT SYNTAX (We can use it only if we add
 import listEndpoints from "express-list-endpoints"
 import usersRouter from "./api/users/index.js"
 import booksRouter from "./api/books/index.js"
+import { genericErrorHandler, badRequestHandler, unauthorizedHandler, notfoundHandler } from "./errorsHandlers.js"
 
 const server = Express()
 const port = 3001
@@ -30,6 +31,12 @@ server.use(Express.json()) // If you don't add this line BEFORE the endpoints al
 // ************************** ENDPOINTS ***********************
 server.use("/users", usersRouter)
 server.use("/books", loggerMiddleware, booksRouter)
+
+// ************************* ERROR HANDLERS *******************
+server.use(badRequestHandler) // 400
+server.use(unauthorizedHandler) // 401
+server.use(notfoundHandler) // 404
+server.use(genericErrorHandler) // 500 (this should ALWAYS be the last one)
 
 server.listen(port, () => {
   console.table(listEndpoints(server))
