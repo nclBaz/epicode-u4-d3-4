@@ -22,7 +22,12 @@ const booksJSONPath = join(dirname(fileURLToPath(import.meta.url)), "books.json"
 const getBooks = () => JSON.parse(fs.readFileSync(booksJSONPath))
 const writeBooks = booksArray => fs.writeFileSync(booksJSONPath, JSON.stringify(booksArray))
 
-booksRouter.post("/", (req, res) => {
+const aStupidMiddleware = (req, res, next) => {
+  console.log("I am a stupid middleware!")
+  next()
+}
+
+booksRouter.post("/", aStupidMiddleware, (req, res) => {
   const newBook = { ...req.body, id: uniqid(), createdAt: new Date(), updatedAt: new Date() }
 
   const booksArray = getBooks()
@@ -32,8 +37,7 @@ booksRouter.post("/", (req, res) => {
   res.status(201).send({ id: newBook.id })
 })
 
-booksRouter.get("/", (req, res) => {
-  console.log("REQ.QUERY:", req.query)
+booksRouter.get("/", aStupidMiddleware, (req, res) => {
   const books = getBooks()
   if (req.query && req.query.category) {
     const filteredBooks = books.filter(book => book.category === req.query.category)
